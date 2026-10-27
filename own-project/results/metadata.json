@@ -21,7 +21,8 @@
     200,
     400
   ],
-  "repeats": 3,
+  "timing_repeats": 3,
+  "memory_measurement_runs": 1,
   "random_seed": null,
   "randomness": "none; deterministic",
   "python": "3.14.2 (tags/v3.14.2:df79316, Dec  5 2025, 17:18:21) [MSC v.1944 64 bit (AMD64)]",
@@ -31,7 +32,7 @@
     "ruff": "0.17.3",
     "ty": "0.0.92"
   },
-  "source_sha256": "cf24caa0a3fc5ac01dff17a6a80f810cbe0ac16828b9b35515975b96bec71b68",
-  "timing_note": "compare only on the same hardware",
-  "source_commit": "882ca0641321402232f2010237de8160133aa19c"
+  "source_sha256": "dc07aecb02bb1d8a3a1f55121f27b7010ef18a95e3b691a71e9f435a61fc4273",
+  "timing_note": "timed without tracemalloc; compare only on the same hardware"
 }
+
