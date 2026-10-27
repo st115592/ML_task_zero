@@ -16,7 +16,7 @@ from orbit_sim import (
 
 def test_circular_force_balance():
     speed = math.sqrt(MU / R)
-    assert acceleration((R, 0))[0] == pytest.approx(-speed**2 / R)
+    assert acceleration((R, 0))[0] == pytest.approx(-(speed**2) / R)
     assert acceleration((R, 0))[1] == pytest.approx(0, abs=1e-14)
 
 
