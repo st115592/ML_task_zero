@@ -73,4 +73,3 @@ def test_singularity_and_reference_invariants():
     r, v = (R, 0), (0, math.sqrt(MU / R))
     assert energy(r, v) == pytest.approx(-MU / (2 * R))
     assert angular_momentum(r, v) == pytest.approx(R * v[1])
-
