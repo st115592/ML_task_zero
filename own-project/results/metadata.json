@@ -32,7 +32,7 @@
     "ruff": "0.17.3",
     "ty": "0.0.92"
   },
-  "source_sha256": "dc07aecb02bb1d8a3a1f55121f27b7010ef18a95e3b691a71e9f435a61fc4273",
+  "source_sha256": "f08fee3a6c74e5498977b33b0e3cfe39e8b1c49c0536949f01d7131ca4cc1974",
   "timing_note": "timed without tracemalloc; compare only on the same hardware"
 }
 
