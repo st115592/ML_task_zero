@@ -32,6 +32,8 @@
     "ruff": "0.17.3",
     "ty": "0.0.92"
   },
-  "source_sha256": "dc07aecb02bb1d8a3a1f55121f27b7010ef18a95e3b691a71e9f435a61fc4273",
+  "source_sha256": "d2585469978b8808f885dbb812104871ce4482b5fdaf5055c89922a9319a3642",
+  "source_commit": "74c545b5a442b619705376a3db5437c0765f55e2",
+  "source_sha256_normalization": "UTF-8 text with normalized LF newlines",
   "timing_note": "timed without tracemalloc; compare only on the same hardware"
 }
