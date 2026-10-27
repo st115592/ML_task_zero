@@ -106,15 +106,19 @@ def metrics(samples: list[tuple[float, Vec, Vec]]) -> dict[str, float]:
 
 
 def _measure(method: str, dt: float, steps: int, repeats: int):
-    times, peak, samples = [], 0, []
+    times = []
     for _ in range(repeats):
-        tracemalloc.start()
         start = time.perf_counter()
-        samples = simulate(method, dt, steps)
+        timed_samples = simulate(method, dt, steps)
         times.append(time.perf_counter() - start)
-        _, used = tracemalloc.get_traced_memory()
+        del timed_samples
+
+    tracemalloc.start()
+    try:
+        samples = simulate(method, dt, steps)
+        _, peak = tracemalloc.get_traced_memory()
+    finally:
         tracemalloc.stop()
-        peak = max(peak, used)
     return samples, statistics.median(times), peak
 
 
@@ -135,7 +139,8 @@ def run(output: Path, counts: list[int], repeats: int) -> None:
                     **metrics(samples),
                     "median_runtime_s": seconds,
                     "peak_traced_memory_bytes": memory,
-                    "repeats": repeats,
+                    "timing_repeats": repeats,
+                    "memory_measurement_runs": 1,
                 }
             )
             if method == "rk4":
@@ -170,14 +175,15 @@ def run(output: Path, counts: list[int], repeats: int) -> None:
         "analytic_period_s": PERIOD,
         "methods": list(METHODS),
         "steps_per_orbit": counts,
-        "repeats": repeats,
+        "timing_repeats": repeats,
+        "memory_measurement_runs": 1,
         "random_seed": None,
         "randomness": "none; deterministic",
         "python": sys.version,
         "platform": platform.platform(),
         "tool_versions": tool_versions,
         "source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
-        "timing_note": "compare only on the same hardware",
+        "timing_note": "timed without tracemalloc; compare only on the same hardware",
     }
     (output / "metadata.json").write_text(
         json.dumps(metadata, indent=2) + "\n", encoding="utf-8"
@@ -195,3 +201,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
