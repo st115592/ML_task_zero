@@ -6,6 +6,7 @@ import hashlib
 import json
 import math
 import platform
+import re
 import statistics
 import sys
 import time
@@ -122,7 +123,11 @@ def _measure(method: str, dt: float, steps: int, repeats: int):
     return samples, statistics.median(times), peak
 
 
-def run(output: Path, counts: list[int], repeats: int) -> None:
+def run(
+    output: Path, counts: list[int], repeats: int, source_commit: str | None = None
+) -> None:
+    if source_commit is not None and not re.fullmatch(r"[0-9a-f]{40}", source_commit):
+        raise ValueError("source_commit must be a 40-character Git SHA")
     if not counts or min(counts) < 4 or repeats < 1:
         raise ValueError("counts must be >= 4 and repeats must be positive")
     output.mkdir(parents=True, exist_ok=True)
@@ -160,6 +165,16 @@ def run(output: Path, counts: list[int], repeats: int) -> None:
             tool_versions[name] = version(name)
         except PackageNotFoundError:
             tool_versions[name] = None
+    source_hash = hashlib.sha256(
+        Path(__file__).read_text(encoding="utf-8").encode("utf-8")
+    ).hexdigest()
+    previous_metadata_path = output / "metadata.json"
+    if source_commit is None and previous_metadata_path.exists():
+        previous_metadata = json.loads(
+            previous_metadata_path.read_text(encoding="utf-8")
+        )
+        if previous_metadata.get("source_sha256") == source_hash:
+            source_commit = previous_metadata.get("source_commit")
     metadata = {
         "model": "planar massless spacecraft, fixed Newtonian point-mass Earth",
         "units": {
@@ -182,7 +197,9 @@ def run(output: Path, counts: list[int], repeats: int) -> None:
         "python": sys.version,
         "platform": platform.platform(),
         "tool_versions": tool_versions,
-        "source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "source_sha256": source_hash,
+        "source_commit": source_commit,
+        "source_sha256_normalization": "UTF-8 text with normalized LF newlines",
         "timing_note": "timed without tracemalloc; compare only on the same hardware",
     }
     (output / "metadata.json").write_text(
@@ -195,8 +212,14 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=Path("results"))
     parser.add_argument("--steps-per-orbit", default="100,200,400")
     parser.add_argument("--repeats", type=int, default=3)
+    parser.add_argument("--source-commit", help="Git SHA of the simulator revision")
     args = parser.parse_args()
-    run(args.output, [int(n) for n in args.steps_per_orbit.split(",")], args.repeats)
+    run(
+        args.output,
+        [int(n) for n in args.steps_per_orbit.split(",")],
+        args.repeats,
+        args.source_commit,
+    )
 
 
 if __name__ == "__main__":
