@@ -7,8 +7,8 @@
     "mu": "m^3/s^2",
     "specific_energy": "m^2/s^2"
   },
-  "mu_m3_s2": 398600441800000,
-  "initial_radius_m": 7000000,
+  "mu_m3_s2": 398600441800000.0,
+  "initial_radius_m": 7000000.0,
   "initial_speed_m_s": 7546.053290107542,
   "analytic_period_s": 5828.516637686015,
   "methods": [
@@ -31,7 +31,7 @@
     "ruff": "0.17.3",
     "ty": "0.0.92"
   },
-  "source_sha256": "8c7aea2c771e98b92e06deab0987bcdf20145656c1fcfe18e2ab207dbc84dd50",
+  "source_sha256": "cf24caa0a3fc5ac01dff17a6a80f810cbe0ac16828b9b35515975b96bec71b68",
   "timing_note": "compare only on the same hardware",
-  "source_commit": "e9a29e80871846df6aa4e9343e700916d910b26a"
+  "source_commit": "882ca0641321402232f2010233aa19c"
 }
