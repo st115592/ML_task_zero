@@ -1,4 +1,5 @@
 """Compare basic integrators for a circular Earth orbit; all values use SI units."""
+
 import argparse
 import csv
 import hashlib
@@ -57,10 +58,8 @@ def _derivative(r: Vec, v: Vec) -> tuple[Vec, Vec]:
 
 def _rk4(r: Vec, v: Vec, dt: float) -> tuple[Vec, Vec]:
     k1 = _derivative(r, v)
-    k2 = _derivative(add(r, mul(dt / 2, k1[0])),
-                     add(v, mul(dt / 2, k1[1])))
-    k3 = _derivative(add(r, mul(dt / 2, k2[0])),
-                     add(v, mul(dt / 2, k2[1])))
+    k2 = _derivative(add(r, mul(dt / 2, k1[0])), add(v, mul(dt / 2, k1[1])))
+    k3 = _derivative(add(r, mul(dt / 2, k2[0])), add(v, mul(dt / 2, k2[1])))
     k4 = _derivative(add(r, mul(dt, k3[0])), add(v, mul(dt, k3[1])))
     dr = add(add(k1[0], mul(2, k2[0])), add(mul(2, k3[0]), k4[0]))
     dv = add(add(k1[1], mul(2, k2[1])), add(mul(2, k3[1]), k4[1]))
@@ -98,11 +97,12 @@ def metrics(samples: list[tuple[float, Vec, Vec]]) -> dict[str, float]:
         exact = exact_position(t)
         pos_err = max(pos_err, math.hypot(r[0] - exact[0], r[1] - exact[1]) / R)
         energy_drift = max(energy_drift, abs(energy(r, v) - e0) / abs(e0))
-        momentum_drift = max(momentum_drift,
-                             abs(angular_momentum(r, v) - h0) / abs(h0))
-    return {"max_relative_position_error": pos_err,
-            "max_relative_energy_drift": energy_drift,
-            "max_relative_angular_momentum_drift": momentum_drift}
+        momentum_drift = max(momentum_drift, abs(angular_momentum(r, v) - h0) / abs(h0))
+    return {
+        "max_relative_position_error": pos_err,
+        "max_relative_energy_drift": energy_drift,
+        "max_relative_angular_momentum_drift": momentum_drift,
+    }
 
 
 def _measure(method: str, dt: float, steps: int, repeats: int):
@@ -127,16 +127,24 @@ def run(output: Path, counts: list[int], repeats: int) -> None:
         dt = PERIOD / n
         for method in METHODS:
             samples, seconds, memory = _measure(method, dt, n, repeats)
-            rows.append({"method": method, "steps_per_orbit": n, "dt_s": dt,
-                         **metrics(samples), "median_runtime_s": seconds,
-                         "peak_traced_memory_bytes": memory, "repeats": repeats})
+            rows.append(
+                {
+                    "method": method,
+                    "steps_per_orbit": n,
+                    "dt_s": dt,
+                    **metrics(samples),
+                    "median_runtime_s": seconds,
+                    "peak_traced_memory_bytes": memory,
+                    "repeats": repeats,
+                }
+            )
             if method == "rk4":
                 with (output / f"trajectory_{n}.csv").open(
-                        "w", newline="", encoding="utf-8") as stream:
+                    "w", newline="", encoding="utf-8"
+                ) as stream:
                     writer = csv.writer(stream)
                     writer.writerow(("time_s", "x_m", "y_m", "vx_m_s", "vy_m_s"))
-                    writer.writerows((t, r[0], r[1], v[0], v[1])
-                                     for t, r, v in samples)
+                    writer.writerows((t, r[0], r[1], v[0], v[1]) for t, r, v in samples)
     with (output / "metrics.csv").open("w", newline="", encoding="utf-8") as stream:
         writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
         writer.writeheader()
@@ -149,19 +157,31 @@ def run(output: Path, counts: list[int], repeats: int) -> None:
             tool_versions[name] = None
     metadata = {
         "model": "planar massless spacecraft, fixed Newtonian point-mass Earth",
-        "units": {"position": "m", "time": "s", "velocity": "m/s",
-                  "mu": "m^3/s^2", "specific_energy": "m^2/s^2"},
-        "mu_m3_s2": MU, "initial_radius_m": R, "initial_speed_m_s": V,
-        "analytic_period_s": PERIOD, "methods": list(METHODS),
-        "steps_per_orbit": counts, "repeats": repeats, "random_seed": None,
-        "randomness": "none; deterministic", "python": sys.version,
+        "units": {
+            "position": "m",
+            "time": "s",
+            "velocity": "m/s",
+            "mu": "m^3/s^2",
+            "specific_energy": "m^2/s^2",
+        },
+        "mu_m3_s2": MU,
+        "initial_radius_m": R,
+        "initial_speed_m_s": V,
+        "analytic_period_s": PERIOD,
+        "methods": list(METHODS),
+        "steps_per_orbit": counts,
+        "repeats": repeats,
+        "random_seed": None,
+        "randomness": "none; deterministic",
+        "python": sys.version,
         "platform": platform.platform(),
         "tool_versions": tool_versions,
         "source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "timing_note": "compare only on the same hardware",
     }
-    (output / "metadata.json").write_text(json.dumps(metadata, indent=2) + "\n",
-                                          encoding="utf-8")
+    (output / "metadata.json").write_text(
+        json.dumps(metadata, indent=2) + "\n", encoding="utf-8"
+    )
 
 
 def main() -> None:
